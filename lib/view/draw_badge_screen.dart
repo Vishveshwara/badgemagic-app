@@ -48,8 +48,8 @@ class _DrawBadgeState extends State<DrawBadge> {
 
   void _setLandscapeOrientation() {
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
     ]);
   }
 
