@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen>
     speedDialProvider = SpeedDialProvider(animationProvider);
     super.initState();
 
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   void handleTextChange() {
@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ],
       child: DefaultTabController(
-          length: 3,
+          length: 4,
           child: CommonScaffold(
             index: 0,
             title: 'Badge Magic',
@@ -203,6 +203,10 @@ class _HomeScreenState extends State<HomeScreen>
                       unselectedLabelColor: mdGrey400,
                       indicatorColor: colorPrimary,
                       controller: _tabController,
+                      labelStyle: TextStyle(
+                        fontSize: 12.sp, // Adjust font size for better fit
+                        fontWeight: FontWeight.w500,
+                      ),
                       splashFactory: InkRipple.splashFactory,
                       overlayColor: WidgetStateProperty.resolveWith<Color?>(
                         (Set<WidgetState> states) {
@@ -214,6 +218,7 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                       tabs: const [
                         Tab(text: 'Speed'),
+                        Tab(text: 'Modes'),
                         Tab(text: 'Animation'),
                         Tab(text: 'Effects'),
                       ],
@@ -239,6 +244,7 @@ class _HomeScreenState extends State<HomeScreen>
                               },
                               child: RadialDial()),
                           AnimationTab(),
+                          CustomAnimationTab(),
                           EffectTab(),
                         ],
                       ),
