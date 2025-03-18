@@ -2,6 +2,7 @@ import 'package:badgemagic/constants.dart';
 import 'package:badgemagic/view/widgets/animation_container.dart';
 import 'package:badgemagic/view/widgets/effects_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 //effects tab to show effects that the user can select
 class EffectTab extends StatefulWidget {
@@ -117,6 +118,51 @@ class _AnimationTabState extends State<AnimationTab> {
           ],
         ),
       ],
+    );
+  }
+}
+
+class CustomAnimationTab extends StatefulWidget {
+  const CustomAnimationTab({
+    super.key,
+  });
+
+  @override
+  State<CustomAnimationTab> createState() => _CustomAnimationTabState();
+}
+
+class _CustomAnimationTabState extends State<CustomAnimationTab> {
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3, // 3 columns
+          childAspectRatio: 110.w / 65.h, // width to height ratio
+        ),
+        itemCount: 2, // Total items (3 rows × 3 columns)
+        itemBuilder: (context, index) {
+          // Map indexes to corresponding animations
+          switch (index) {
+            case 0:
+              return AniContainer(
+                animation: aniLinearScroll,
+                animationName: 'Linear Scroll',
+                index: index + 9,
+              );
+            case 1:
+              return AniContainer(
+                animation: aniBidirectionalScroll,
+                animationName: 'Bidirectional Scroll',
+                index: index + 9,
+              );
+            default:
+              return const SizedBox.shrink();
+          }
+        },
+      ),
     );
   }
 }

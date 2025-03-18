@@ -6,8 +6,10 @@ import 'package:badgemagic/badge_animation/ani_down.dart';
 import 'package:badgemagic/badge_animation/ani_fixed.dart';
 import 'package:badgemagic/badge_animation/ani_laser.dart';
 import 'package:badgemagic/badge_animation/ani_left.dart';
+import 'package:badgemagic/badge_animation/ani_bidirectional_scroll.dart';
 import 'package:badgemagic/badge_animation/ani_picture.dart';
 import 'package:badgemagic/badge_animation/ani_right.dart';
+import 'package:badgemagic/badge_animation/ani_linear_scroll.dart';
 import 'package:badgemagic/badge_animation/ani_snowflake.dart';
 import 'package:badgemagic/badge_animation/ani_up.dart';
 import 'package:badgemagic/badge_animation/animation_abstract.dart';
@@ -28,6 +30,8 @@ Map<int, BadgeAnimation?> animationMap = {
   6: PictureAnimation(),
   7: AniAnimation(),
   8: LaserAnimation(),
+  9: LinearScrollAnimation(),
+  10: BidirectionalScrollAnimation(),
 };
 
 Map<int, BadgeEffect> effectMap = {
