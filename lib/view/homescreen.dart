@@ -9,6 +9,7 @@ import 'package:badgemagic/badge_effect/marquee_effect.dart';
 import 'package:badgemagic/constants.dart';
 import 'package:badgemagic/providers/animation_badge_provider.dart';
 import 'package:badgemagic/providers/badge_message_provider.dart';
+import 'package:badgemagic/providers/font_provider.dart';
 import 'package:badgemagic/providers/imageprovider.dart';
 import 'package:badgemagic/providers/speed_dial_provider.dart';
 import 'package:badgemagic/view/special_text_field.dart';
@@ -24,6 +25,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -124,6 +126,35 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
+  TextStyle _getFontStyle(String fontName) {
+    const baseStyle = TextStyle(fontSize: 12);
+    switch (fontName) {
+      case 'Roboto':
+        return GoogleFonts.roboto(
+            textStyle: baseStyle.copyWith(fontWeight: FontWeight.w700));
+      case 'Open Sans':
+        return GoogleFonts.openSans(
+            textStyle: baseStyle.copyWith(fontWeight: FontWeight.w700));
+      case 'Lato':
+        return GoogleFonts.lato(
+            textStyle: baseStyle.copyWith(fontWeight: FontWeight.w700));
+      case 'Poppins':
+        return GoogleFonts.poppins(
+            textStyle: baseStyle.copyWith(fontWeight: FontWeight.w700));
+      case 'Montserrat':
+        return GoogleFonts.montserrat(
+            textStyle: baseStyle.copyWith(fontWeight: FontWeight.w700));
+      case 'Orbitron':
+        return GoogleFonts.orbitron(
+            textStyle: baseStyle.copyWith(fontWeight: FontWeight.w700));
+      case 'Lexend':
+        return GoogleFonts.lexend(
+            textStyle: baseStyle.copyWith(fontWeight: FontWeight.w700));
+      default:
+        return baseStyle;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -177,10 +208,60 @@ class _HomeScreenState extends State<HomeScreen>
                               },
                               icon: const Icon(Icons.tag_faces_outlined),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.r)),
-                              borderSide: BorderSide(color: colorPrimary),
+                            suffixIcon: Padding(
+                              padding: EdgeInsets.only(right: 8.w),
+                              child: Consumer<FontProvider>(
+                                builder: (context, fontProvider, _) {
+                                  return DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: fontProvider.selectedFont,
+                                      icon: const Icon(Icons.arrow_drop_down),
+                                      hint: Text(
+                                        'Font',
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      items: [
+                                        DropdownMenuItem(
+                                          value: null,
+                                          child: Text(
+                                            'Default Font',
+                                            style: TextStyle(
+                                              fontSize: 12.sp,
+                                            ),
+                                          ),
+                                        ),
+                                        ...fontProvider.availableFonts
+                                            .map((font) => DropdownMenuItem(
+                                                  value: font,
+                                                  child: Text(
+                                                    font,
+                                                    style: _getFontStyle(font),
+                                                  ),
+                                                ))
+                                      ],
+                                      onChanged: (String? newFont) {
+                                        Provider.of<FontProvider>(context,
+                                                listen: false)
+                                            .changeFont(newFont);
+                                        animationProvider.badgeAnimation(
+                                          inlineImageProvider
+                                              .getController()
+                                              .text,
+                                          Converters(),
+                                          animationProvider.isEffectActive(
+                                              InvertLEDEffect()),
+                                        );
+                                      },
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      elevation: 2,
+                                      isDense: true,
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),

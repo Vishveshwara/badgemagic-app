@@ -1,3 +1,4 @@
+import 'package:badgemagic/providers/font_provider.dart';
 import 'package:badgemagic/providers/getitlocator.dart';
 import 'package:badgemagic/providers/imageprovider.dart';
 import 'package:badgemagic/view/about_us_screen.dart';
@@ -23,6 +24,8 @@ void main() {
     providers: [
       ChangeNotifierProvider<InlineImageProvider>(
           create: (context) => getIt<InlineImageProvider>()),
+      ChangeNotifierProvider<FontProvider>(
+          create: (context) => getIt<FontProvider>()),
     ],
     child: const MyApp(),
   ));
