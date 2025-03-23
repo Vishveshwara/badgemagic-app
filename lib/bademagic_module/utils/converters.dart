@@ -1,10 +1,14 @@
 import 'dart:math';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:badgemagic/bademagic_module/utils/byte_array_utils.dart';
 import 'package:badgemagic/bademagic_module/utils/data_to_bytearray_converter.dart';
 import 'package:badgemagic/bademagic_module/utils/file_helper.dart';
 import 'package:badgemagic/bademagic_module/utils/image_utils.dart';
+import 'package:badgemagic/providers/font_provider.dart';
 import 'package:badgemagic/providers/imageprovider.dart';
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 class Converters {
@@ -14,9 +18,166 @@ class Converters {
   ImageUtils imageUtils = ImageUtils();
   FileHelper fileHelper = FileHelper();
 
+  List<String> _matrixToHex(List<List<bool>> matrix) {
+    return matrix.map((row) {
+      String binary = row.map((b) => b ? '1' : '0').join();
+      return int.parse(binary, radix: 2).toRadixString(16).padLeft(2, '0');
+    }).toList();
+  }
+
+  Future<Map<String, dynamic>> renderTextToMatrix(
+    String message,
+    TextStyle textStyle, {
+    int cols = 8,
+    int rows = 11,
+    int scale = 1,
+    required bool hasDescender, // for characters like j, g, p, q, y
+  }) async {
+    // Calculate canvas size
+    TextPainter widthCheckPainter = TextPainter(
+      text: TextSpan(
+        text: message,
+        style: textStyle.copyWith(
+            color: Colors.black, fontSize: (textStyle.fontSize ?? 14) * scale),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    widthCheckPainter.layout();
+    final bool isWide = widthCheckPainter.width > cols * scale;
+    // Adjust columns if wide
+    if (isWide) cols = 16;
+
+    // Calculate final dimensions
+    final int width = cols * scale;
+    final int height = rows * scale;
+
+    // Create single PictureRecorder and Canvas
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(
+        recorder, Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()));
+
+    // Fill background
+    final Paint bgPaint = Paint()..color = Colors.white;
+    canvas.drawRect(
+        Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()), bgPaint);
+
+    // Create text painter with final dimensions
+    final TextPainter textPainter = TextPainter(
+      text: TextSpan(
+        text: message,
+        style: textStyle.copyWith(
+            color: Colors.black, fontSize: (textStyle.fontSize ?? 14) * scale),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout(maxWidth: width.toDouble());
+    Offset offset;
+    if (hasDescender) {
+      // Adjust position for characters with descenders
+      final baselinePosition = height * 0.8;
+      offset = Offset(
+        0,
+        baselinePosition -
+            textPainter
+                .computeDistanceToActualBaseline(TextBaseline.alphabetic),
+      );
+    } else {
+      // Center text for normal characters
+      offset = Offset(
+        (width - textPainter.width) / 2,
+        (height - textPainter.height) / 2,
+      );
+    }
+
+    textPainter.paint(canvas, offset);
+
+    final ui.Picture picture = recorder.endRecording();
+    final ui.Image image = await picture.toImage(width, height);
+    final ByteData? byteData =
+        await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+
+    if (byteData == null) {
+      throw Exception("Failed to convert image to byte data.");
+    }
+    final Uint8List data = byteData.buffer.asUint8List();
+
+    // Downsample: For each cell (scale x scale block) compute average brightness.
+    List<List<bool>> matrix =
+        List.generate(rows, (_) => List.generate(cols, (_) => false));
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < cols; col++) {
+        int sum = 0;
+        int count = 0;
+        for (int y = 0; y < scale; y++) {
+          for (int x = 0; x < scale; x++) {
+            int pixelX = col * scale + x;
+            int pixelY = row * scale + y;
+            int index =
+                (pixelY * width + pixelX) * 4; // 4 bytes per pixel (RGBA)
+            if (index + 3 < data.length) {
+              // Calculate brightness using average of R, G, B channels.
+              int r = data[index];
+              int g = data[index + 1];
+              int b = data[index + 2];
+              int brightness = ((r + g + b) / 3).round();
+              sum += brightness;
+              count++;
+            }
+          }
+        }
+        double avgBrightness = sum / count;
+        // Use a threshold of 128 to decide if the LED is on (true) or off (false)
+        matrix[row][col] = avgBrightness < 128;
+      }
+    }
+    //print(matrix);
+    return {'matrix': matrix, 'isWide': isWide};
+  }
+
+  Future<List<String>> _processCustomFontChar(
+      String char, TextStyle style) async {
+    try {
+      bool hasDescender = false;
+      if (char == "y" ||
+          char == "g" ||
+          char == "p" ||
+          char == "q" ||
+          char == "j") {
+        hasDescender = true;
+      }
+      final matrix = await renderTextToMatrix(char, style,
+          cols: 8, // Match original character width
+          rows: 11, // Match original character height
+          scale: 1,
+          hasDescender: hasDescender);
+      if (matrix['isWide']) {
+        final List<List<bool>> matrix1 = [];
+        final List<List<bool>> matrix2 = [];
+        for (var row in matrix['matrix']) {
+          // Get the first 8 columns.
+          matrix1.add(row.sublist(0, 8));
+          // Get the remaining 8 columns.
+          matrix2.add(row.sublist(8, 16));
+        }
+        var x = _matrixToHex(matrix1);
+        var y = _matrixToHex(matrix2);
+        x.addAll(y);
+        return x;
+      } else {
+        return _matrixToHex(matrix['matrix']);
+      }
+    } catch (e) {
+      logger.e("Error rendering character '$char'", error: e);
+      return [];
+    }
+  }
+
   int controllerLength = 0;
 
   Future<List<String>> messageTohex(String message, bool isInverted) async {
+    final fontProvider = GetIt.instance<FontProvider>();
+    final usingCustomFont = fontProvider.selectedFont != null;
     List<String> hexStrings = [];
     for (int x = 0; x < message.length; x++) {
       if (message[x] == '<' && message[min(x + 5, message.length - 1)] == '>') {
@@ -37,11 +198,23 @@ class Converters {
           x += 5;
         }
       } else {
-        if (converter.charCodes.containsKey(message[x])) {
-          hexStrings.add(converter.charCodes[message[x]]!);
+        if (usingCustomFont) {
+          // Handle custom font rendering
+          final charHex = await _processCustomFontChar(
+            message[x],
+            fontProvider.selectedTextStyle,
+          );
+          //print("charhex - $charHex");
+          hexStrings.addAll(charHex);
+        } else {
+          // Original character handling
+          if (converter.charCodes.containsKey(message[x])) {
+            hexStrings.add(converter.charCodes[message[x]]!);
+          }
         }
       }
     }
+
     if (isInverted) {
       hexStrings = invertHex(hexStrings.join()).split('');
       hexStrings = padHexString(hexStrings);
