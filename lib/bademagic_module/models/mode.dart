@@ -17,7 +17,7 @@ enum Mode {
   //method to get the integer value of the mode
   static int getIntValue(Mode mode) {
     String hexValue = mode.hexValue.substring(3, 4);
-    int intValue = int.parse(hexValue, radix: 10);
+    int intValue = int.parse(hexValue, radix: 16);
     return intValue;
   }
 

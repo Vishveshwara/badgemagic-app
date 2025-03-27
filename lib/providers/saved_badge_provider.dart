@@ -30,7 +30,9 @@ Map<int, Mode> modeValueMap = {
   5: Mode.snowflake,
   6: Mode.picture,
   7: Mode.animation,
-  8: Mode.laser
+  8: Mode.laser,
+  9: Mode.linearScroll,
+  10: Mode.bidirectionalScroll,
 };
 
 class SavedBadgeProvider extends ChangeNotifier {
