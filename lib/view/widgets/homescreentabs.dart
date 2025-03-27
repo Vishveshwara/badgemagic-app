@@ -142,7 +142,7 @@ class _CustomAnimationTabState extends State<CustomAnimationTab> {
           crossAxisCount: 3, // 3 columns
           childAspectRatio: 110.w / 65.h, // width to height ratio
         ),
-        itemCount: 2, // Total items (3 rows × 3 columns)
+        itemCount: 2,
         itemBuilder: (context, index) {
           // Map indexes to corresponding animations
           switch (index) {

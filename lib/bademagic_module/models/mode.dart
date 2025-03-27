@@ -7,7 +7,9 @@ enum Mode {
   snowflake('0x05'),
   picture('0x06'),
   animation('0x07'),
-  laser('0x08');
+  laser('0x08'),
+  linearScroll('0x09'),
+  bidirectionalScroll('0x0A');
 
   final String hexValue;
   const Mode(this.hexValue);
