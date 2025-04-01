@@ -21,7 +21,7 @@ class FontProvider extends ChangeNotifier {
   }
 
   TextStyle get selectedTextStyle {
-    const baseStyle = TextStyle(fontSize: 14, color: Colors.black);
+    const baseStyle = TextStyle(fontSize: 12, color: Colors.black);
     if (_selectedFont == null) return baseStyle;
 
     switch (_selectedFont!) {
@@ -42,7 +42,8 @@ class FontProvider extends ChangeNotifier {
             textStyle: baseStyle.copyWith(fontWeight: FontWeight.w700));
       case 'Orbitron':
         return GoogleFonts.orbitron(
-            textStyle: baseStyle.copyWith(fontWeight: FontWeight.w700));
+            textStyle:
+                baseStyle.copyWith(fontSize: 10, fontWeight: FontWeight.w700));
       case 'Lexend':
         return GoogleFonts.lexend(
             textStyle: baseStyle.copyWith(fontWeight: FontWeight.w700));

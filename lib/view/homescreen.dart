@@ -196,6 +196,13 @@ class _HomeScreenState extends State<HomeScreen>
                           onChanged: (value) {},
                           controller: inlineimagecontroller,
                           specialTextSpanBuilder: ImageBuilder(),
+                          style: Provider.of<FontProvider>(context)
+                                      .selectedFont !=
+                                  null
+                              ? _getFontStyle(Provider.of<FontProvider>(context)
+                                      .selectedFont!)
+                                  .copyWith(fontSize: 14)
+                              : const TextStyle(fontSize: 14),
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.r),
