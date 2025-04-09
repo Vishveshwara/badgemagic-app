@@ -254,7 +254,8 @@ class SaveBadgeCard extends StatelessWidget {
                         (Speed.getIntValue(file
                                     .jsonToData(badgeData.value)
                                     .messages[0]
-                                    .speed)+1)
+                                    .speed) +
+                                1)
                             .toString(),
                         style: const TextStyle(color: Colors.white),
                       ),
