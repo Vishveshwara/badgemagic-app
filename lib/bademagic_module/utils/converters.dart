@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 import 'package:badgemagic/bademagic_module/utils/byte_array_utils.dart';
 import 'package:badgemagic/bademagic_module/utils/data_to_bytearray_converter.dart';
 import 'package:badgemagic/bademagic_module/utils/file_helper.dart';
-import 'package:badgemagic/bademagic_module/utils/font_cache.dart';
 import 'package:badgemagic/bademagic_module/utils/image_utils.dart';
 import 'package:badgemagic/providers/font_provider.dart';
 import 'package:badgemagic/providers/imageprovider.dart';
@@ -23,6 +22,8 @@ class Converters {
   ImageUtils imageUtils = ImageUtils();
   FileHelper fileHelper = FileHelper();
 
+  static final Map<String, List<List<bool>>> _characterCache = {};
+
   List<String> _matrixToHex(List<List<bool>> matrix) {
     return List.generate(matrix.length, (i) {
       final binary = matrix[i].map((b) => b ? '1' : '0').join();
@@ -36,24 +37,23 @@ class Converters {
     int rows = 11,
     required bool hasDescender, // for characters like j, g, p, q, y
   }) async {
-    // Generate font key for cache lookup
+    // Generate combined cache key using font properties and message
     final fontKey = getFontKey(
       textStyle.fontFamily ?? 'default',
       textStyle.fontSize ?? 14.0,
       textStyle.fontWeight ?? FontWeight.normal,
       textStyle.fontStyle == FontStyle.italic,
     );
-    //print('fontkey: $fontKey');
+    final cacheKey = '$fontKey-$message';
 
-    // Check cache first
-    if (fontCache.containsKey(fontKey)) {
-      final cachedFont = fontCache[fontKey]!;
-      if (cachedFont.containsKey(message)) {
-        return {
-          'matrix': cachedFont[message]!,
-        };
-      }
+    // Check character cache
+    if (_characterCache.containsKey(cacheKey)) {
+      //print("Cache hit for $cacheKey");
+      return {
+        'matrix': _characterCache[cacheKey]!,
+      };
     }
+
     int cols = 1;
     int scale = 1;
     // Calculate canvas size
@@ -161,6 +161,9 @@ class Converters {
         matrix[row][col] = avgBrightness < 128;
       }
     }
+
+    // Cache the result for future use
+    _characterCache[cacheKey] = matrix;
     return {'matrix': matrix};
   }
 

@@ -2,8 +2,6 @@ import 'package:badgemagic/constants.dart';
 import 'package:badgemagic/view/widgets/common_scaffold_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:badgemagic/bademagic_module/utils/font_matrix_logger.dart';
-import 'package:badgemagic/bademagic_module/utils/converters.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -104,26 +102,6 @@ class SettingsScreenState extends State<SettingsScreen> {
                   }).toList(),
                 ),
               ),
-            ),
-            const SizedBox(height: 40),
-            const Text(
-              'Developer Options',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: () async {
-                final locations = await FontMatrixLogger.getSaveLocations();
-                FontMatrixLogger.logAllMatrices(Converters());
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                        'Font matrices will be saved to:\n${locations.join("\n")}'),
-                    duration: const Duration(seconds: 5),
-                  ),
-                );
-              },
-              child: const Text('Log Font Matrices'),
             ),
           ],
         ),
