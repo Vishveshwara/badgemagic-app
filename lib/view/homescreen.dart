@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:badgemagic/bademagic_module/utils/byte_array_utils.dart';
 import 'package:badgemagic/bademagic_module/utils/converters.dart';
 import 'package:badgemagic/bademagic_module/utils/image_utils.dart';
 import 'package:badgemagic/bademagic_module/utils/toast_utils.dart';
@@ -196,102 +195,105 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ],
       child: DefaultTabController(
-          length: 3,
-          child: CommonScaffold(
-            index: 0,
-            title: 'Badge Magic',
-            body: SafeArea(
-              child: SingleChildScrollView(
-                physics: isDialInteracting
-                    ? const NeverScrollableScrollPhysics()
-                    : const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  children: [
-                    AnimationBadge(),
-                    Container(
-                      margin: EdgeInsets.all(15.w),
-                      child: Material(
-                        color: drawerHeaderTitle,
-                        borderRadius: BorderRadius.circular(10.r),
-                        elevation: 4,
-                        child: ExtendedTextField(
-                    controller: inlineimagecontroller,
-                    specialTextSpanBuilder: ImageBuilder(),
-                    style: Provider.of<FontProvider>(context).selectedFont != null
-                        ? _getFontStyle(Provider.of<FontProvider>(context)
-                                .selectedFont!)
-                            .copyWith(fontSize: 14)
-                        : const TextStyle(fontSize: 14),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.r),
-                        borderSide: BorderSide(color: colorPrimary),
-                      ),
-                      prefixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            isPrefixIconClicked = !isPrefixIconClicked;
-                          });
-                        },
-                        icon: const Icon(Icons.tag_faces_outlined),
-                      ),
-                      suffixIcon: Padding(
-                        padding: EdgeInsets.only(right: 8.w),
-                        child: Consumer<FontProvider>(
-                          builder: (context, fontProvider, _) {
-                            return DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: fontProvider.selectedFont,
-                                icon: const Icon(Icons.arrow_drop_down),
-                                hint: Text(
-                                  'Font',
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                items: [
-                                  const DropdownMenuItem(
-                                    value: null,
-                                    child: Text(
-                                      'Default Font',
+        length: 3,
+        child: CommonScaffold(
+          index: 0,
+          title: 'Badge Magic',
+          body: SafeArea(
+            child: SingleChildScrollView(
+              physics: isDialInteracting
+                  ? const NeverScrollableScrollPhysics()
+                  : const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  AnimationBadge(),
+                  Container(
+                    margin: EdgeInsets.all(15.w),
+                    child: Material(
+                      color: drawerHeaderTitle,
+                      borderRadius: BorderRadius.circular(10.r),
+                      elevation: 4,
+                      child: ExtendedTextField(
+                        controller: inlineimagecontroller,
+                        specialTextSpanBuilder: ImageBuilder(),
+                        style: Provider.of<FontProvider>(context)
+                                    .selectedFont !=
+                                null
+                            ? _getFontStyle(Provider.of<FontProvider>(context)
+                                    .selectedFont!)
+                                .copyWith(fontSize: 14)
+                            : const TextStyle(fontSize: 14),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.r),
+                            borderSide: BorderSide(color: colorPrimary),
+                          ),
+                          prefixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                isPrefixIconClicked = !isPrefixIconClicked;
+                              });
+                            },
+                            icon: const Icon(Icons.tag_faces_outlined),
+                          ),
+                          suffixIcon: Padding(
+                            padding: EdgeInsets.only(right: 8.w),
+                            child: Consumer<FontProvider>(
+                              builder: (context, fontProvider, _) {
+                                return DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    value: fontProvider.selectedFont,
+                                    icon: const Icon(Icons.arrow_drop_down),
+                                    hint: Text(
+                                      'Font',
                                       style: TextStyle(
-                                        fontSize: 12,
+                                        fontSize: 12.sp,
+                                        color: Colors.grey[600],
                                       ),
                                     ),
-                                  ),
-                                  ...fontProvider.availableFonts.map((font) => DropdownMenuItem(
-                                        value: font,
+                                    items: [
+                                      const DropdownMenuItem(
+                                        value: null,
                                         child: Text(
-                                          font,
-                                          style: _getFontStyle(font),
+                                          'Default Font',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                          ),
                                         ),
-                                      ))
-                                ],
-                                onChanged: (String? newFont) {
-                                  fontProvider.changeFont(newFont);
-                                  animationProvider.badgeAnimation(
-                                    inlineimagecontroller.text,
-                                    Converters(),
-                                    animationProvider.isEffectActive(
-                                        InvertLEDEffect()),
-                                  );
-                                },
-                                borderRadius: BorderRadius.circular(8.r),
-                                elevation: 2,
-                                isDense: true,
-                              ),
-                            );
-                          },
+                                      ),
+                                      ...fontProvider.availableFonts
+                                          .map((font) => DropdownMenuItem(
+                                                value: font,
+                                                child: Text(
+                                                  font,
+                                                  style: _getFontStyle(font),
+                                                ),
+                                              ))
+                                    ],
+                                    onChanged: (String? newFont) {
+                                      fontProvider.changeFont(newFont);
+                                      animationProvider.badgeAnimation(
+                                        inlineimagecontroller.text,
+                                        Converters(),
+                                        animationProvider
+                                            .isEffectActive(InvertLEDEffect()),
+                                      );
+                                    },
+                                    borderRadius: BorderRadius.circular(8.r),
+                                    elevation: 2,
+                                    isDense: true,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
                   Visibility(
                     visible: isPrefixIconClicked,
                     child: Container(
