@@ -157,7 +157,7 @@ class Converters {
             }
           }
         }
-        double avgBrightness = sum / count;
+        double avgBrightness = count > 0 ? sum / count : 0;
         matrix[row][col] = avgBrightness < 128;
       }
     }
@@ -200,14 +200,10 @@ class Converters {
           String text = segment['content'];
           for (int i = 0; i < text.length; i++) {
             String char = text[i];
-            List<List<bool>> charMatrix;
-
             bool hasDescender = "ypgqj".contains(char);
-            final matrix = await renderTextToMatrix(char, style,
+            final matrixData = await renderTextToMatrix(char, style,
                 rows: 11, hasDescender: hasDescender);
-            charMatrix = matrix['matrix'];
-
-            // Add character matrix to combined matrix
+            List<List<bool>> charMatrix = matrixData['matrix'];
             for (int row = 0; row < 11; row++) {
               combinedMatrix[row].addAll(charMatrix[row]);
             }
@@ -216,6 +212,7 @@ class Converters {
           // Process bitmap
           int index = segment['index'];
           var key = controllerData.imageCache.keys.toList()[index];
+          List<String> hexStrings;
           if (key is List) {
             String filename = key[0];
             List<dynamic>? decodedData =
@@ -224,48 +221,26 @@ class Converters {
                 decodedData!.cast<List<dynamic>>();
             List<List<int>> imageData =
                 image.map((list) => list.cast<int>()).toList();
-            var hexStrings = convertBitmapToLEDHex(imageData, true);
-
-            // Convert hex strings back to bool matrix and add to combined matrix
-            for (var hex in hexStrings) {
-              List<List<bool>> segmentMatrix =
-                  List.generate(11, (_) => List.filled(8, false));
-              for (int i = 0; i < 11; i++) {
-                String hexByte = hex.substring(i * 2, (i * 2) + 2);
-                int value = int.parse(hexByte, radix: 16);
-                for (int bit = 0; bit < 8; bit++) {
-                  segmentMatrix[i][bit] = ((value >> (7 - bit)) & 1) == 1;
-                }
-              }
-              // Add segment to combined matrix
-              for (int row = 0; row < 11; row++) {
-                combinedMatrix[row].addAll(segmentMatrix[row]);
-              }
-            }
+            hexStrings = convertBitmapToLEDHex(imageData, true);
           } else {
-            var hexStrings =
+            hexStrings =
                 await imageUtils.generateLedHex(controllerData.vectors[index]);
-            for (var hex in hexStrings) {
-              List<List<bool>> segmentMatrix =
-                  List.generate(11, (_) => List.filled(8, false));
-              for (int i = 0; i < 11; i++) {
-                String hexByte = hex.substring(i * 2, (i * 2) + 2);
-                int value = int.parse(hexByte, radix: 16);
-                for (int bit = 0; bit < 8; bit++) {
-                  segmentMatrix[i][bit] = ((value >> (7 - bit)) & 1) == 1;
-                }
-              }
-              // Add segment to combined matrix
-              for (int row = 0; row < 11; row++) {
-                combinedMatrix[row].addAll(segmentMatrix[row]);
+          }
+
+          for (var hex in hexStrings) {
+            for (int i = 0; i < 11; i++) {
+              String hexByte = hex.substring(i * 2, (i * 2) + 2);
+              int value = int.parse(hexByte, radix: 16);
+              for (int bit = 0; bit < 8; bit++) {
+                combinedMatrix[i].add(((value >> (7 - bit)) & 1) == 1);
               }
             }
           }
         }
       }
 
-      // Add final padding to make total columns divisible by 8
-      int totalColumns = combinedMatrix[0].length;
+      int totalColumns =
+          combinedMatrix.isNotEmpty ? combinedMatrix[0].length : 0;
       if (totalColumns % 8 != 0) {
         int paddingNeeded = 8 - (totalColumns % 8);
         final padding = List.filled(paddingNeeded, false);
@@ -274,20 +249,25 @@ class Converters {
         }
       }
 
-      // Convert to hex in 8-column segments
       List<String> allHexStrings = [];
-      int segmentss = combinedMatrix[0].length ~/ 8;
+      int segmentsCount =
+          combinedMatrix.isNotEmpty ? combinedMatrix[0].length ~/ 8 : 0;
 
-      for (int seg = 0; seg < segmentss; seg++) {
+      for (int seg = 0; seg < segmentsCount; seg++) {
         final startCol = seg * 8;
+        final endCol = startCol + 8;
         final segmentMatrix = List.generate(
-            11, (row) => combinedMatrix[row].sublist(startCol, startCol + 8));
-        allHexStrings.addAll(_matrixToHex(segmentMatrix));
+            11, (row) => combinedMatrix[row].sublist(startCol, endCol));
+
+        final List<String> hexBytes = _matrixToHex(segmentMatrix);
+        final String segmentHex = hexBytes.join();
+        allHexStrings.add(segmentHex);
       }
 
       return allHexStrings;
-    } catch (e) {
-      logger.e("Error processing segments", error: e);
+    } catch (e, stacktrace) {
+      logger.e("Error processing custom font message",
+          error: e, stackTrace: stacktrace);
       return [];
     }
   }
@@ -444,7 +424,7 @@ class Converters {
       }
     }
 
-    logger.d("Padded image: $list");
+    //logger.d("Padded image: $list");
 
     // Convert each 8-bit segment into hexadecimal strings
     List<String> allHexs = [];
