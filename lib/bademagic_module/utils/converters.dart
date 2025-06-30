@@ -138,27 +138,16 @@ class Converters {
         List.generate(rows, (_) => List.generate(cols, (_) => false));
     for (int row = 0; row < rows; row++) {
       for (int col = 0; col < cols; col++) {
-        int sum = 0;
-        int count = 0;
-        for (int y = 0; y < scale; y++) {
-          for (int x = 0; x < scale; x++) {
-            int pixelX = col * scale + x;
-            int pixelY = row * scale + y;
-            int index =
-                (pixelY * width + pixelX) * 4; // 4 bytes per pixel (RGBA)
-            if (index + 3 < data.length) {
-              // Calculate brightness using average of R, G, B channels.
-              int r = data[index];
-              int g = data[index + 1];
-              int b = data[index + 2];
-              int brightness = ((r + g + b) / 3).round();
-              sum += brightness;
-              count++;
-            }
-          }
+        final int pixelIndex = (row * width + col) * 4;
+
+        if (pixelIndex + 3 < data.length) {
+          final int r = data[pixelIndex];
+          final int g = data[pixelIndex + 1];
+          final int b = data[pixelIndex + 2];
+          final int brightness = ((r + g + b) / 3).round();
+
+          matrix[row][col] = brightness < 128;
         }
-        double avgBrightness = count > 0 ? sum / count : 0;
-        matrix[row][col] = avgBrightness < 128;
       }
     }
 
