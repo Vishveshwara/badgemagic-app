@@ -290,8 +290,8 @@ class _HomeScreenState extends State<HomeScreen>
                                         animationProvider.badgeAnimation(
                                           inlineimagecontroller.text,
                                           Converters(),
-                                          animationProvider
-                                              .isEffectActive(InvertLEDEffect()),
+                                          animationProvider.isEffectActive(
+                                              InvertLEDEffect()),
                                         );
                                       },
                                       borderRadius: BorderRadius.circular(8.r),
